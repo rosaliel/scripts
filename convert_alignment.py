@@ -2,7 +2,7 @@
 
 import sys
 import argparse
-import MSA
+import msa
 
 def parse_args():
     desc = "converts between different alignment formats"

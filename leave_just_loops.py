@@ -1,7 +1,7 @@
 """
 """
 
-import MSA
+import msa
 import sys
 import argparse
 import os 
