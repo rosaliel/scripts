@@ -10,6 +10,6 @@
 -pdb_comments true ## this is the mover reades the comments in the input pdb file. The comments contain the pdb segments comprising the input pdb
 
 -parser:protocol relax_baseline.xml
-
+#-parser:protocol repack_baseline.xml
 -use_occurrence_data 1
 -out:path:pdb pdb/

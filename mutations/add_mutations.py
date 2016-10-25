@@ -67,6 +67,7 @@ def main():
     job_args.append('-parser:script_vars chel_res="{}"'.format(chel_res))
     job_args.append('-s ' + source)
     rosetta_job.create_job(name=job_name, path=path, args=job_args)
+    os.system(path + '/command')
             
 if __name__ == '__main__':
     main()
