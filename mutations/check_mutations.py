@@ -5,8 +5,12 @@ import rosetta_job
 import shutil
 import glob
 from numpy import mean
+from pprint import pprint 
+
 baseline_name = 'baseline'
 to_compare = 'to_compare'
+times = 5
+delta = 1
 
 def parse_args():
     """"""
@@ -46,7 +50,7 @@ def create_baseline(path, source, template, chel_res):
     Returns the path to the baseline file 
     """
     jobs = list()
-    for i in range(1,6):
+    for i in range(1, times + 1):
         name = 'baseline_' + str(i)
         job_args = ['@flags_baseline']
         job_args.append('-parser:script_vars template="{}"'.format(template))
@@ -103,6 +107,13 @@ def _get_energies(path):
         energies[name] = energy
     return energies  
 
+def print_summary(path, baseline_E, mutations):
+    """"""
+    summary = open(path + '/summary', 'w')
+    summary.write('Baseline energy: ' + str(baseline_E))
+    summary.write('\nGood mutations:\n')
+    summary.writelines(['{} {}\n'.format(pose, id) for pose, id in mutations])
+    
 def parse_output(path):
     """
     Creates a summary file with the best energy for every mutation
@@ -110,16 +121,31 @@ def parse_output(path):
     path -- general path to where out/ pdb/ err etc. are
     """
     energies = _get_energies(path)
+    energy_to_compare = mean([energies[i] 
+                              for i in energies.keys() 
+                              if to_compare in i])
+    energy_per_mut = dict()
+    for mut in energies:
+        name = mut[mut.find('_') + 1: mut.find('__')]
+        if (to_compare in mut) or name == baseline_name:
+            continue
+        elif energies[mut] - delta < energy_to_compare:
+            if name in energy_per_mut.keys():
+                energy_per_mut[name] += 1
+            else:
+                energy_per_mut[name] = 1
+    mutations = [(mut.split('_')[0], mut.split('_')[1]) 
+                 for mut, v in energy_per_mut.iteritems() 
+                 if v * 2 > times]
+    return (energy_to_compare, mutations)    
     
-    # energy_to_compare = mean([energies[i] 
-                              # for i in energies.keys() 
-                              # if to_compare in i])
-    # print energies
-    # energies = {k: v for k, v in energies if to_compare not in k}
-    # print energies
-    
-    
-    
+def parse_output_lowest(path):
+    """
+    Creates a summary file with the best (lowest) energy for every mutation
+    Arguments:
+    path -- general path to where out/ pdb/ err etc. are
+    """
+    energies = _get_energies(path)
     best_energies = dict()
     for mut in energies.keys():
         number = mut[: mut.find('_')]
@@ -131,8 +157,8 @@ def parse_output(path):
     
     summary = open(path + '/summary', 'w')
     summary.writelines(['{:<30}{}\n'.format(mut, best_energies[mut]) 
-                       for mut in sorted(best_energies.keys())])    
-      
+                       for mut in sorted(best_energies.keys())])   
+                       
 # main functions running this script   
 def check_mutations(path, source, template, chel_res, mutations_path):
     """Main function for running from a different module
@@ -159,7 +185,7 @@ def check_mutations(path, source, template, chel_res, mutations_path):
 
     # running the script 5 times and kipping the lowest energy for each mutation
     jobs = list()
-    for i in range(1,6):
+    for i in range(1, times + 1):
         for pose, id in mutations:
             if (pose == seq_number + chain) and (id == res_name): # null mut
                 name = str(i) + '_to_compare'
@@ -180,7 +206,8 @@ def check_mutations(path, source, template, chel_res, mutations_path):
     os.system(path + '/command')
     rosetta_job.wait_jobs(path, jobs)
         
-    parse_output(path)
+    baseline_E, mutations = parse_output(path)
+    print_summary(path, baseline_E, mutations)
     
 def main():
     args = parse_args()
