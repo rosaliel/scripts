@@ -1,0 +1,34 @@
+<dock_design>
+	<TASKOPERATIONS>
+		<RestrictToRepacking name=rtr/>
+		<InitializeFromCommandline name=init/>
+		<IncludeCurrent name=include_curr/>
+		<RestrictIdentitiesAtAlignedPositions name=restrict_chelating_E_design source_pdb="%%template%%" repack_shell=0.01 design_only_target_residues=1 resnums="%%chel_res%%" keep_aas="ADEFGHIKLMNPQRSTVWY"/>
+        <DesignAround name=des_around design_shell=8 resnums="%%place%%" repack_shell=8 allow_design=0 resnums_allow_design=0/> 
+	</TASKOPERATIONS>
+	<SCOREFXNS>
+		<talaris weights=talaris2014>
+			<Reweight scoretype="coordinate_constraint" weight=0.4/>
+		</talaris>
+	</SCOREFXNS>
+	<FILTERS>
+	</FILTERS>
+	<MOVERS>
+        <ParsedProtocol name=mutate>
+			<MutateResidue name=mut target="%%place%%" new_res="%%new_res%%"/>
+		</ParsedProtocol>      
+		<AtomCoordinateCstMover name=chelating_res_E refrence_pdb="%%template%%" func_groups=1 task_operations=restrict_chelating_E_design coord_dev=0.01/>
+		PackRotamersMover name=prm task_operations=init,include_curr,rtr,des_around scorefxn=talaris/>
+		<PackRotamersMover name=prm task_operations=init,include_curr,rtr scorefxn=talaris/>
+		<RotamerTrialsMinMover name=rtmin task_operations=init,include_curr,rtr scorefxn=talaris/>
+		<MinMover name=min bb=1 chi=1 scorefxn=talaris/>
+		<AddConstraintsToCurrentConformationMover name=csts/>
+	</MOVERS>
+	<PROTOCOLS>
+		<Add mover=csts/>
+		<Add mover=chelating_res_E/>
+		<Add mover=mutate/>
+		<Add mover=prm/>
+		<Add mover=min/>
+	</PROTOCOLS>
+</dock_design>
