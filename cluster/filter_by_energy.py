@@ -1,3 +1,5 @@
+#!/bin/env python
+
 from programsIO import max_cluster as mc
 import argparse
 from pprint import pprint as pp

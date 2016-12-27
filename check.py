@@ -1,3 +1,7 @@
+#!/bin/env python
+ 
+# same as 4pud: 4pu 4prw 1hiz 3mmd 1r8 2fgl
+
 import sys
 import argparse
 def parse_args():
@@ -8,8 +12,8 @@ def parse_args():
                         help = 'pattern to search for the trmplate')
     parser.add_argument('designs', 
                         help = 'list of designs pdb',
-			nargs = '+',
-			action = 'store')
+                        nargs = '+',
+                        action = 'store')
     return parser.parse_args()
 
 def main():

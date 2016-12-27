@@ -99,12 +99,15 @@ def seq_diff(prot1, prot2):
     """ 
     prot1_resn = get_resi_resn(prot1)
     prot2_resn = get_resi_resn(prot2)    
-    diff1 = ''
-    diff2 = ''
-    for i in range(0, len(prot1_resn)):
+    diff1 = '0+'
+    diff2 = '0+'
+    length = (len(prot1_resn) if len(prot1_resn) < len(prot2_resn) 
+                else len(prot2_resn))
+    for i in range(0, length):
         resi1, resn1 =  prot1_resn[i]
         resi2, resn2 =  prot2_resn[i]
         if resn1 != resn2:
+	    print 'in if'
             diff1 += str(resi1 + '+')
             diff2 += str(resi2 + '+')
     create_selection('mutations_{}_{}'.format(prot1, prot2), 
@@ -112,7 +115,7 @@ def seq_diff(prot1, prot2):
                      'wheat')
     create_selection('mutations_{}_{}'.format(prot2, prot1), 
                      'resi {} and {}'.format(diff2, prot2),
-                     'wheat')        
+                     'marine')        
 
 cmd.extend("seq_diff_aln", seq_diff_alignment) 
 cmd.extend("seq_diff", seq_diff) 
